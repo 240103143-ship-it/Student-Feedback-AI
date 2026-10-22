@@ -4,6 +4,8 @@ from app.nlp.pii import mask_pii_report, names_pattern
 
 
 class PiiMaskingTests(unittest.TestCase):
+    """Story 1.4: personal data is removed before a comment is stored or analyzed."""
+
     def setUp(self):
         self.names = names_pattern([
             "Dr. Aigerim Nurlanovna",

@@ -82,6 +82,11 @@ def _suggestions(rows: list[dict], limit: int = 6) -> list[dict]:
 
 
 def aspect_stats(rows: list[dict]) -> list[dict]:
+    """Per topic: the responses that mention it and their positive / neutral / negative split.
+
+    Feeds stories 3.2–3.4. Counts come from each response's stored `aspects`,
+    so one response counts at most once per topic.
+    """
     stats: dict[str, Counter] = defaultdict(Counter)
     for r in rows:
         for topic, label in (r.get("aspects") or {}).items():

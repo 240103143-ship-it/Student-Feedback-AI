@@ -38,6 +38,8 @@ def invalidate_topics() -> None:
 
 
 def get_matchers(db: Session):
+    # Story 3.2: topics and their keywords live in the topic_categories table. Admin
+    # edits to it call invalidate_topics(), so the next analysis uses the new list.
     if _matchers_cache["items"] is None:
         cats = db.scalars(select(TopicCategory).where(TopicCategory.is_active.is_(True))).all()
         _matchers_cache["items"] = build_matchers([{"name": c.name, "keywords": c.keywords} for c in cats])
@@ -45,6 +47,12 @@ def get_matchers(db: Session):
 
 
 def analyze_into(fb: Feedback, raw_text: str, matchers) -> Feedback:
+    """Sprint 3: analyzes one comment and stores every result on its Feedback row.
+
+    Used for form submissions, CSV/Excel imports, the demo seed and admin
+    re-analysis. `analyze` also runs a generic PII pass of its own; for course
+    and service evaluations it is a second pass after masking known names.
+    """
     a = analyze(raw_text, matchers, fb.rating)
     fb.text = a.text
     fb.language = a.language

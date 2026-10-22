@@ -84,6 +84,11 @@ def open_forms(user: User = Depends(student_only), db: Session = Depends(get_db)
 
 @router.post("/{survey_id}/submit")
 def submit(survey_id: int, body: SubmitIn, user: User = Depends(student_only), db: Session = Depends(get_db)):
+    """Stores one anonymous response: raw comment -> PII masking -> Sprint 3 analysis -> commit.
+
+    Writes two rows in one transaction: the Feedback (answer and analysis, no user)
+    and the SubmissionReceipt (user and target, no answer).
+    """
     survey = db.get(Survey, survey_id)
     if not survey or survey.status != "open" or survey.kind not in FORM_KINDS:
         raise HTTPException(404, "This form is not open")
@@ -111,6 +116,7 @@ def submit(survey_id: int, body: SubmitIn, user: User = Depends(student_only), d
     if any(not 1 <= v <= 5 for v in body.ratings.values()):
         raise HTTPException(422, "Ratings must be between 1 and 5")
     fb.ratings = {str(k): v for k, v in body.ratings.items()}
+    # The rounded mean is the numeric signal the analyzer blends with the text (story 3.1).
     fb.rating = round(sum(body.ratings.values()) / len(body.ratings))
 
     # Story 1.4: personal data is removed before anything is stored — the raw comment never reaches the DB.
@@ -123,6 +129,8 @@ def submit(survey_id: int, body: SubmitIn, user: User = Depends(student_only), d
     # committed.  The numeric rating provides a signal for empty comments.
     analyze_into(fb, masked, get_matchers(db))
 
+    # Story 1.3: the receipt records who answered, the feedback what was answered.
+    # Both commit together, so a duplicate submission saves neither row.
     db.add(SubmissionReceipt(user_id=user.id, survey_id=survey.id, target_key=target))
     db.add(fb)
     try:

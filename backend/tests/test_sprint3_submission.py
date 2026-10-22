@@ -13,6 +13,8 @@ from app.services import invalidate_topics
 
 
 class Sprint3SubmissionIntegrationTests(unittest.TestCase):
+    """Runs the real submit() endpoint against an in-memory SQLite database."""
+
     def setUp(self):
         self.engine = create_engine("sqlite://")
         Base.metadata.create_all(self.engine)
@@ -43,6 +45,7 @@ class Sprint3SubmissionIntegrationTests(unittest.TestCase):
         invalidate_topics()
 
     def test_anonymous_submission_is_analyzed_before_commit(self):
+        """Submit -> PII masking -> analysis -> commit: the stored row carries the Sprint 3 analysis."""
         result = submit(
             self.survey.id,
             SubmitIn(
@@ -58,9 +61,11 @@ class Sprint3SubmissionIntegrationTests(unittest.TestCase):
         receipt = self.db.scalar(select(SubmissionReceipt))
         self.assertTrue(result["ok"])
         self.assertIsNotNone(receipt)
+        # Rated 4/5, but the text is mostly negative: 70% text + 30% rating is negative overall...
         self.assertEqual(feedback.sentiment, "negative")
         self.assertIn("Teaching Quality", feedback.topics)
         self.assertIn("Workload", feedback.topics)
+        # ...while each topic keeps its own opinion (story 3.3).
         self.assertEqual(feedback.aspects["Teaching Quality"], "positive")
         self.assertEqual(feedback.aspects["Workload"], "negative")
         self.assertGreater(feedback.confidence, 0)

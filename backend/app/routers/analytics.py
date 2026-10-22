@@ -31,6 +31,7 @@ def filters_dep(
 
 
 def _kpis(rows: list[dict]) -> dict:
+    """Story 3.1 totals: how many responses are positive, neutral and negative, and their shares."""
     n = len(rows)
     c = Counter(r["sentiment"] for r in rows)
     ratings = [r["rating"] for r in rows if r.get("rating")]
@@ -40,6 +41,7 @@ def _kpis(rows: list[dict]) -> dict:
         "total": n,
         "positive": c["positive"], "neutral": c["neutral"], "negative": c["negative"],
         "positive_share": round(pos, 4), "negative_share": round(neg, 4),
+        # "Net sentiment" on the dashboard: positive share minus negative share, in percentage points.
         "satisfaction_index": round((pos - neg) * 100, 1),
         "avg_rating": round(sum(ratings) / len(ratings), 2) if ratings else None,
     }
@@ -90,9 +92,13 @@ def meta(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
 
 @router.get("/analytics/overview")
 def overview(f: Filters = Depends(filters_dep), user: User = Depends(staff_only), db: Session = Depends(get_db)):
+    """Sprint 3 dashboard data (stories 3.1–3.4) for the responses the user's role may see."""
     sems = _all_semesters(db, user)
     target = f.semester or (sems[-1] if sems else None)
+    # Role scoping happens here on the server: faculty get their own courses,
+    # managers their department plus university services, admins everything.
     rows = feedback_rows(db, user, f)
+    # Story 3.1: sentiment counts and shares, net sentiment and the average rating.
     kpi = _kpis(rows)
 
     # Period-over-period deltas: selected (or latest) semester vs the one before it
@@ -112,9 +118,14 @@ def overview(f: Filters = Depends(filters_dep), user: User = Depends(staff_only)
         }
 
     colors = _topic_colors(db)
+    # Stories 3.2 and 3.3: for every topic, how many responses mention it and how many
+    # of those mentions are positive, neutral or negative (from the stored aspects).
     topics = aspect_stats(rows)
     for t in topics:
         t["color"] = colors.get(t["topic"], "#8b5cff")
+    # Story 3.4: a topic becomes a common problem once at least three responses mention it
+    # negatively. Ranked by negative mentions x negative share, so 6 negative out of 6
+    # (score 6) comes before 6 out of 12 (score 3). Only the top five are returned.
     problems = sorted([t for t in topics if t["negative"] >= 3],
                       key=lambda t: (t["negative"] * t["negative_share"]), reverse=True)[:5]
 

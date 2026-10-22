@@ -62,6 +62,7 @@ class Service(Base):
 
 
 class TopicCategory(Base):
+    """Story 3.2: the topic taxonomy the analyzer detects; admins can add or edit topics."""
     __tablename__ = "topic_categories"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(80), unique=True)
@@ -94,6 +95,13 @@ class Survey(Base):
 
 
 class Feedback(Base):
+    """One anonymous response: the answer and its Sprint 3 analysis.
+
+    There is deliberately no user column. Who answered is recorded only in
+    SubmissionReceipt, which has no id that points to this row.
+    The analysis is computed when the response is saved, and the dashboard
+    only aggregates the stored columns.
+    """
     __tablename__ = "feedback"
     id: Mapped[int] = mapped_column(primary_key=True)
     survey_id: Mapped[int | None] = mapped_column(ForeignKey("surveys.id", ondelete="SET NULL"), nullable=True, index=True)
@@ -106,15 +114,16 @@ class Feedback(Base):
     ratings: Mapped[dict] = mapped_column(JSON, default=dict)  # {question_id: 1..5}
     # Only the anonymized text is stored; the raw submission never reaches the database.
     text: Mapped[str] = mapped_column(Text)
-    language: Mapped[str] = mapped_column(String(4), default="en")
-    sentiment: Mapped[str] = mapped_column(String(16), index=True, default="neutral")
-    sentiment_score: Mapped[float] = mapped_column(Float, default=0.0)
-    confidence: Mapped[float] = mapped_column(Float, default=0.0)
-    topics: Mapped[list] = mapped_column(JSON, default=list)
-    aspects: Mapped[dict] = mapped_column(JSON, default=dict)  # {topic: "positive"|"neutral"|"negative"}
-    keywords: Mapped[list] = mapped_column(JSON, default=list)
-    pii_masked: Mapped[bool] = mapped_column(Boolean, default=False)
-    is_corrected: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Sprint 3 analysis results, filled in by services.analyze_into():
+    language: Mapped[str] = mapped_column(String(4), default="en")  # en | ru | kk
+    sentiment: Mapped[str] = mapped_column(String(16), index=True, default="neutral")  # 3.1: positive | neutral | negative
+    sentiment_score: Mapped[float] = mapped_column(Float, default=0.0)  # -1..1, text blended with the rating
+    confidence: Mapped[float] = mapped_column(Float, default=0.0)  # 0.45..0.99 from the analyzer
+    topics: Mapped[list] = mapped_column(JSON, default=list)  # 3.2: topic names, most mentioned first
+    aspects: Mapped[dict] = mapped_column(JSON, default=dict)  # 3.3: {topic: "positive"|"neutral"|"negative"}
+    keywords: Mapped[list] = mapped_column(JSON, default=list)  # most frequent content words
+    pii_masked: Mapped[bool] = mapped_column(Boolean, default=False)  # personal data was removed (story 1.4)
+    is_corrected: Mapped[bool] = mapped_column(Boolean, default=False)  # fixed by an admin; re-analysis skips it
     source: Mapped[str] = mapped_column(String(16), default="form")  # form | import | seed
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
 

@@ -1021,8 +1021,9 @@
       </button>
     </section>
 
+    <!-- Sprint 3 dashboard. Every number comes from GET /api/analytics/overview; the page only draws it. -->
     <section class="fa-grid" aria-label="Feedback insights">
-      <!-- Story 3.1 — sentiment analysis -->
+      <!-- Story 3.1 — sentiment analysis: positive / neutral / negative split (sentimentHtml) -->
       <article class="fa-card" aria-labelledby="faSentimentTitle">
         <header class="fa-card-head"><div>
           <span class="fa-kicker">Sentiment analysis</span>
@@ -1031,7 +1032,7 @@
         </div></header>
         <div id="sentimentAnalysis"></div>
       </article>
-      <!-- Story 3.2 — topic detection -->
+      <!-- Story 3.2 — topic detection: topics ranked by how many responses mention them (topicsHtml) -->
       <article class="fa-card" aria-labelledby="faTopicsTitle">
         <header class="fa-card-head"><div>
           <span class="fa-kicker">Topic detection</span>
@@ -1040,7 +1041,7 @@
         </div></header>
         <div id="topicAnalysis"></div>
       </article>
-      <!-- Story 3.3 — aspect-based sentiment -->
+      <!-- Story 3.3 — aspect-based sentiment: each topic's own positive / neutral / negative split (aspectsHtml) -->
       <article class="fa-card" aria-labelledby="faAspectsTitle">
         <header class="fa-card-head"><div>
           <span class="fa-kicker">Aspect-based sentiment</span>
@@ -1049,7 +1050,7 @@
         </div></header>
         <div id="aspectAnalysis"></div>
       </article>
-      <!-- Story 3.4 — common problem detection -->
+      <!-- Story 3.4 — common problem detection: topics with 3+ negative mentions, ranked on the server (problemsHtml) -->
       <article class="fa-card" aria-labelledby="faProblemsTitle">
         <header class="fa-card-head"><div>
           <span class="fa-kicker">Common problem detection</span>
@@ -1060,7 +1061,7 @@
       </article>
     </section>
 
-    <!-- Feedback explorer: every response as a card, filtered on the client -->
+    <!-- Feedback explorer: every response from GET /api/evaluations/responses as a card, filtered on the client -->
     <section class="fx" aria-labelledby="rspHeading">
       <div class="fx-head">
         <h2 id="rspHeading" tabindex="-1">Feedback explorer</h2>
@@ -2508,6 +2509,7 @@ async function loadResponses() {
   FA_CARDS.forEach(id => { $(id).innerHTML = FA_SKELETON; });
   rspEmpty.hidden = true;
   rspCount.textContent = "Loading responses…";
+  // Both endpoints apply the role scope on the server; the page only displays what they return.
   const [responsesResult, analyticsResult] = await Promise.all([
     api("/evaluations/responses", { token: currentSession.token }),
     api("/analytics/overview", { token: currentSession.token }),
@@ -2578,6 +2580,7 @@ function showAllToggle(key, count) {
   return `<button type="button" class="fa-more" data-expand="${key}" aria-expanded="${open}">${open ? "Show fewer topics" : `Show all ${count} topics`}</button>`;
 }
 
+// Story 3.1: the sentiment split as a stacked bar and a count per label; each label filters the explorer.
 function sentimentHtml(a) {
   const total = a.total || 0;
   if (!total) return emptyAnalysis("No feedback has been submitted yet.");
@@ -2597,6 +2600,7 @@ function sentimentHtml(a) {
       </button>`).join("")}</div>${net}`;
 }
 
+// Story 3.2: topics ranked by the number of responses that mention them.
 function topicsHtml(a) {
   const topics = rankedTopics(a);
   if (!topics.length) return emptyAnalysis(a.total ? "No topics were detected in these comments." : "No feedback has been submitted yet.");
@@ -2614,6 +2618,7 @@ function topicsHtml(a) {
     </button></li>`).join("")}</ol>${showAllToggle("topics", topics.length)}`;
 }
 
+// Story 3.3: how each topic is mentioned, as a positive / neutral / negative split.
 function aspectsHtml(a) {
   const topics = rankedTopics(a);
   if (!topics.length) return emptyAnalysis(a.total ? "Aspect sentiment appears once comments mention a known topic." : "No feedback has been submitted yet.");
@@ -2630,6 +2635,7 @@ function aspectsHtml(a) {
   }).join("")}</ul>${showAllToggle("aspects", topics.length)}`;
 }
 
+// Story 3.4: the server has already picked and ranked the problems (3+ negative mentions); this only lists them.
 function problemsHtml(a) {
   const problems = a.problems || [];
   const badge = $("problemCount");
@@ -2705,6 +2711,8 @@ function ratingsHtml(r, qLabel) {
     </div>`;
 }
 
+// One response card: overall sentiment (3.1), each detected topic with its own sentiment (3.2, 3.3),
+// the anonymous label and whether personal data was removed.
 function rspHtml(r, qLabel) {
   // Course targets arrive as "CODE — Title"; the code becomes a quiet label above the title.
   const course = r.kind === "course" && r.target.match(/^(.+?) — (.+)$/);
