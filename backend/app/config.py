@@ -26,7 +26,7 @@ class Settings:
 
     # Optional: LLM summaries via the Claude API. Empty key = local summarizer only.
     anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
-    llm_model = os.getenv("LLM_MODEL", "claude-opus-5")
+    llm_model = os.getenv("LLM_MODEL", "claude-opus-5-5")
 
     cors_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:8080").split(",") if o.strip()]
 

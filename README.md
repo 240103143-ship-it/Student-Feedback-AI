@@ -194,6 +194,34 @@ runs offline; no student text is sent to an external AI service.
 
 ---
 
+### Summaries, suggestions, quotes and keywords (Sprint 4)
+
+The analytics page opens with a summary and follows the **Showing** selector at
+the top: choose one course or service and every block on the page, from the
+summary to the keyword cloud, is recalculated for it.
+
+| Story | Where | How it works |
+|---|---|---|
+| 4.1 Feedback summary | **Summary**, first block | Mood, response count and average rating, then *What students value* and *What students want changed*, each with its most typical comment. **Rewrite with AI** asks Claude for a written summary when `ANTHROPIC_API_KEY` is set; comments are sent only after personal data has been removed. |
+| 4.2 Improvement suggestions | **What students suggest** | Sentences that propose a change (“please add…”, “хотелось бы…”, “… керек”) are collected and grouped when several students ask for the same thing. |
+| 4.3 Representative comments | **What students say, by topic** | For each topic, the three comments closest to the topic's centre (TF-IDF), with the tone of that topic in each comment. |
+| 4.4 Keyword cloud | **Frequent words** | Larger words appear in more comments; colour shows the tone of those comments. Selecting a word filters the comments below. |
+
+`GET /api/analytics/summary` and `GET /api/analytics/keywords` accept the same
+`course_id` / `service_id` filters as `/api/analytics/overview`, and are scoped
+by role on the server like every other analytics call.
+
+### Interface
+
+One stylesheet, `frontend/public/pulse.css`, styles every screen in light and
+dark mode and down to phone width. Literata (headings, summaries and quoted
+comments) and Golos Text (interface) both cover the full Kazakh alphabet.
+Wherever personal data was removed from a comment, a dark bar marks the place.
+Staff screens follow the language picker through `frontend/public/staff-i18n.js`
+(English, Russian, Kazakh).
+
+---
+
 ## Stopping / resetting
 
 ```powershell

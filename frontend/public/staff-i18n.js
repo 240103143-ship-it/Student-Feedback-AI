@@ -1,0 +1,414 @@
+/* Russian and Kazakh text for the staff screens (profile, analytics, responses,
+   admin panel and dialogs). Those screens build their English text in
+   index.html; this file translates the rendered text in place, so it follows
+   the language picker without touching any application logic. Comments,
+   names and other user content never match a UI phrase and stay as written. */
+(() => {
+  "use strict";
+
+  // English UI phrase -> [Russian, Kazakh]
+  const PHRASES = {
+    // navigation rail and page frame
+    "Student feedback": ["Отзывы студентов", "Студенттер пікірі"],
+    "Give feedback": ["Оставить отзыв", "Пікір қалдыру"],
+    "Feedback analytics": ["Аналитика отзывов", "Пікірлер аналитикасы"],
+    "Manage users": ["Пользователи", "Пайдаланушылар"],
+    "Open feedback analytics": ["Открыть аналитику отзывов", "Пікірлер аналитикасын ашу"],
+    "Service is online": ["Сервис работает", "Сервис жұмыс істеп тұр"],
+    "Checking the service…": ["Проверяем сервис…", "Сервисті тексеріп жатырмыз…"],
+    "Service is unavailable. Try again in a minute.": ["Сервис недоступен. Попробуйте через минуту.", "Сервис қолжетімсіз. Бір минуттан кейін қайталаңыз."],
+    "Showing": ["Показано", "Көрсетілген"],
+    "Course or service to analyse": ["Курс или сервис для анализа", "Талдауға арналған курс не қызмет"],
+
+    // story 4.1 summary
+    "Summary": ["Краткий итог", "Қысқаша қорытынды"],
+    "Rewrite with AI": ["Переписать с помощью ИИ", "ЖИ арқылы қайта жазу"],
+    "Writing…": ["Пишем…", "Жазып жатыр…"],
+    "Overall, students are mostly positive here.": ["В целом студенты здесь настроены в основном позитивно.", "Жалпы алғанда, студенттер мұнда негізінен оң пікірде."],
+    "Overall, students are mostly critical here.": ["В целом студенты здесь в основном критикуют.", "Жалпы алғанда, студенттер мұнда негізінен сын айтады."],
+    "Overall, opinions here are mixed.": ["В целом мнения здесь разделились.", "Жалпы алғанда, пікірлер екіге бөлінген."],
+    "What students value": ["Что студенты ценят", "Студенттер нені бағалайды"],
+    "What students want changed": ["Что студенты хотят изменить", "Студенттер нені өзгерткісі келеді"],
+    "No topic is clearly praised yet.": ["Пока ни одну тему явно не хвалят.", "Әзірге бірде-бір тақырып анық мақталмаған."],
+    "No topic is clearly criticised.": ["Ни одну тему явно не критикуют.", "Бірде-бір тақырып анық сыналмаған."],
+    "The summary is temporarily unavailable. Use Refresh to try again.": ["Итог временно недоступен. Нажмите «Обновить».", "Қорытынды уақытша қолжетімсіз. «Жаңарту» батырмасын басыңыз."],
+    "AI service unavailable - showing the built-in summary.": ["ИИ-сервис недоступен, показан встроенный итог.", "ЖИ сервисі қолжетімсіз, кірістірілген қорытынды көрсетілді."],
+
+    // story 4.2–4.4
+    "What students suggest": ["Что предлагают студенты", "Студенттер не ұсынады"],
+    "Sentences that propose a change, grouped when several students ask for the same thing.": ["Предложения об изменениях; одинаковые просьбы нескольких студентов объединены.", "Өзгеріс ұсынатын сөйлемдер; бірдей өтініштер біріктірілген."],
+    "No comment proposes a change yet.": ["Пока ни один отзыв не предлагает изменений.", "Әзірге бірде-бір пікір өзгеріс ұсынбаған."],
+    "Suggestions are temporarily unavailable.": ["Предложения временно недоступны.", "Ұсыныстар уақытша қолжетімсіз."],
+    "Frequent words": ["Частые слова", "Жиі кездесетін сөздер"],
+    "Larger words appear in more comments. Colour shows the tone of the comments they come from. Select a word to read those comments.": ["Чем крупнее слово, тем в большем числе отзывов оно встречается. Цвет показывает тон этих отзывов. Нажмите на слово, чтобы прочитать отзывы.", "Сөз неғұрлым үлкен болса, соғұрлым көп пікірде кездеседі. Түсі сол пікірлердің көңіл-күйін көрсетеді. Пікірлерді оқу үшін сөзді басыңыз."],
+    "Keywords are temporarily unavailable.": ["Ключевые слова временно недоступны.", "Кілт сөздер уақытша қолжетімсіз."],
+    "What students say, by topic": ["Что говорят студенты, по темам", "Студенттер не дейді, тақырыптар бойынша"],
+    "The most typical comments for each topic, so the numbers above have context.": ["Самые типичные отзывы по каждой теме, чтобы за цифрами был контекст.", "Әр тақырып бойынша ең тән пікірлер, сандардың мағынасы түсінікті болу үшін."],
+    "Comments are temporarily unavailable.": ["Отзывы временно недоступны.", "Пікірлер уақытша қолжетімсіз."],
+    "Topic": ["Тема", "Тақырып"],
+
+    // stories 3.1–3.4 cards
+    "Sentiment overview": ["Общая тональность", "Жалпы көңіл-күй"],
+    "Comment text and 1–5 ratings, combined into one classification per response.": ["Текст отзыва и оценки 1–5 вместе дают одну метку на каждый ответ.", "Пікір мәтіні мен 1–5 бағалары әр жауапқа бір белгі береді."],
+    "Net sentiment": ["Чистая тональность", "Таза көңіл-күй"],
+    ": the positive share minus the negative share, in percentage points.": [": доля позитивных минус доля негативных, в процентных пунктах.", ": оң үлестен теріс үлесті шегергенде, пайыздық тармақпен."],
+    "of responses": ["ответов", "жауаптың"],
+    "Positive": ["Позитивные", "Оң"],
+    "Neutral": ["Нейтральные", "Бейтарап"],
+    "Negative": ["Негативные", "Теріс"],
+    "Mentions per topic, detected in English, Russian and Kazakh comments.": ["Упоминания по темам в отзывах на английском, русском и казахском.", "Ағылшын, орыс және қазақ тіліндегі пікірлердегі тақырып бойынша аталымдар."],
+    "How each topic is mentioned: one comment can praise teaching and criticise workload.": ["Как упоминается каждая тема: один отзыв может хвалить преподавание и критиковать нагрузку.", "Әр тақырып қалай аталады: бір пікір оқытуды мақтап, жүктемені сынауы мүмкін."],
+    "Common problems": ["Частые проблемы", "Жиі мәселелер"],
+    "Topics with at least three negative mentions, ranked by count and share.": ["Темы с тремя и более негативными упоминаниями, по количеству и доле.", "Кемінде үш теріс аталымы бар тақырыптар, саны мен үлесі бойынша."],
+    "Read these comments": ["Читать эти отзывы", "Бұл пікірлерді оқу"],
+    "Show fewer topics": ["Показать меньше тем", "Азырақ тақырып көрсету"],
+    "No topic has reached three negative mentions.": ["Ни одна тема не набрала трёх негативных упоминаний.", "Бірде-бір тақырып үш теріс аталымға жеткен жоқ."],
+    "Aspect sentiment appears once comments mention a known topic.": ["Аспекты появятся, когда в отзывах упомянут известную тему.", "Пікірлерде белгілі тақырып аталғанда аспектілер шығады."],
+    "Analytics are temporarily unavailable. Use Refresh to try again.": ["Аналитика временно недоступна. Нажмите «Обновить».", "Аналитика уақытша қолжетімсіз. «Жаңарту» батырмасын басыңыз."],
+    "Total responses": ["Всего ответов", "Барлық жауап"],
+
+    // explorer
+    "Feedback explorer": ["Все отзывы", "Барлық пікірлер"],
+    "Search feedback": ["Поиск по отзывам", "Пікірлерден іздеу"],
+    "Search comments, courses or topics": ["Поиск по отзывам, курсам или темам", "Пікір, курс немесе тақырып бойынша іздеу"],
+    "Overall sentiment:": ["Общая тональность:", "Жалпы көңіл-күй:"],
+    "Average rating": ["Средняя оценка", "Орташа баға"],
+    "No written comment, ratings only.": ["Без комментария, только оценки.", "Пікірсіз, тек бағалар."],
+    "Show more": ["Показать полностью", "Толық көрсету"],
+    "Show less": ["Свернуть", "Жию"],
+    "Filtered by": ["Фильтры", "Сүзгілер"],
+    "Clear filters": ["Сбросить фильтры", "Сүзгілерді тазалау"],
+    "No responses match these filters": ["По этим фильтрам ничего нет", "Бұл сүзгілер бойынша ештеңе жоқ"],
+    "Try a different search, or clear the filters to see every response.": ["Измените поиск или сбросьте фильтры, чтобы увидеть все ответы.", "Іздеуді өзгертіңіз немесе барлық жауапты көру үшін сүзгілерді тазалаңыз."],
+    "Try again": ["Повторить", "Қайталау"],
+    "English": ["Английский", "Ағылшын"],
+    "Russian": ["Русский", "Орыс"],
+    "Kazakh": ["Казахский", "Қазақ"],
+    "Course evaluations": ["Оценки курсов", "Курстарды бағалау"],
+    "Service reviews": ["Отзывы о сервисах", "Қызметтерге пікірлер"],
+    "Staff": ["Персонал", "Қызметкерлер"],
+    "Availability": ["Доступность", "Қолжетімділік"],
+    "Quality": ["Качество", "Сапа"],
+
+    // redaction labels inside comments
+    "name": ["имя", "аты"],
+    "email": ["email", "email"],
+    "phone": ["телефон", "телефон"],
+    "contact": ["контакт", "байланыс"],
+    "Your comment as staff will see it": ["Ваш отзыв так, как его увидят сотрудники", "Пікіріңіз қызметкерлерге осылай көрінеді"],
+    "Thank you": ["Спасибо", "Рахмет"],
+    "Your feedback was saved anonymously.": ["Ваш отзыв сохранён анонимно.", "Пікіріңіз анонимді түрде сақталды."],
+    "Done": ["Готово", "Дайын"],
+    "No personal data found in your comment.": ["В вашем отзыве личных данных не найдено.", "Пікіріңізде жеке деректер табылмады."],
+
+    // sign-in messages that come from the server or are reset by the form
+    "Sign in": ["Войти", "Кіру"],
+    "Create account": ["Создать аккаунт", "Аккаунт ашу"],
+    "This user does not exist in the system.": ["Такого пользователя нет в системе.", "Мұндай пайдаланушы жүйеде жоқ."],
+    "Incorrect password.": ["Неверный пароль.", "Құпиясөз қате."],
+    "This account has been banned.": ["Этот аккаунт заблокирован.", "Бұл аккаунт бұғатталған."],
+    "An account with this email already exists.": ["Аккаунт с таким email уже есть.", "Бұл email-мен аккаунт бар."],
+    "An account with this student ID already exists.": ["Аккаунт с таким студенческим ID уже есть.", "Бұл студенттік ID-мен аккаунт бар."],
+    "An account with this email or student ID already exists.": ["Аккаунт с таким email или ID уже есть.", "Бұл email немесе ID-мен аккаунт бар."],
+    "The new password must be different from the current one.": ["Новый пароль должен отличаться от текущего.", "Жаңа құпиясөз ағымдағыдан өзгеше болуы керек."],
+    "Current password is incorrect.": ["Текущий пароль неверный.", "Ағымдағы құпиясөз қате."],
+    "Cannot reach the server. Check that the backend container is running.": ["Нет связи с сервером. Проверьте, что backend запущен.", "Сервермен байланыс жоқ. Backend іске қосылғанын тексеріңіз."],
+
+    // profile card
+    "Account": ["Аккаунт", "Аккаунт"],
+    "Role": ["Роль", "Рөл"],
+    "Department": ["Факультет", "Факультет"],
+    "Session ends": ["Сессия до", "Сессия аяқталады"],
+    "Status": ["Статус", "Күйі"],
+    "Offline — showing saved data": ["Нет связи — показаны сохранённые данные", "Байланыс жоқ — сақталған деректер"],
+    "Change password": ["Сменить пароль", "Құпиясөзді өзгерту"],
+    "Current password": ["Текущий пароль", "Ағымдағы құпиясөз"],
+    "New password": ["Новый пароль", "Жаңа құпиясөз"],
+    "Confirm new password": ["Повторите новый пароль", "Жаңа құпиясөзді қайталаңыз"],
+    "Update password": ["Обновить пароль", "Құпиясөзді жаңарту"],
+    "Open admin panel →": ["Открыть админ-панель →", "Әкімші панелін ашу →"],
+    "View responses →": ["Смотреть ответы →", "Жауаптарды көру →"],
+    "Give feedback →": ["Оставить отзыв →", "Пікір қалдыру →"],
+    "Sign out": ["Выйти", "Шығу"],
+    "Administrator": ["Администратор", "Әкімші"],
+    "Manager": ["Менеджер", "Менеджер"],
+    "Faculty": ["Преподаватель", "Оқытушы"],
+    "Student": ["Студент", "Студент"],
+    "Admin": ["Админ", "Әкімші"],
+    "Profile": ["Профиль", "Профиль"],
+
+    // analytics
+    "Feedback analytics": ["Аналитика отзывов", "Пікірлер аналитикасы"],
+    "Sentiment, topics, aspects and recurring problems in anonymous feedback.": ["Тональность, темы, аспекты и частые проблемы в анонимных отзывах.", "Анонимді пікірлердегі көңіл-күй, тақырыптар, аспектілер және жиі мәселелер."],
+    "All responses across the university. Every response is anonymous.": ["Все ответы по университету. Каждый ответ анонимен.", "Университет бойынша барлық жауаптар. Әр жауап анонимді."],
+    "Responses for the courses you teach. Every response is anonymous.": ["Ответы по вашим курсам. Каждый ответ анонимен.", "Сіз жүргізетін курстар бойынша жауаптар. Әр жауап анонимді."],
+    "Refresh": ["Обновить", "Жаңарту"],
+    "Sentiment": ["Тональность", "Көңіл-күй"],
+    "Overall response sentiment": ["Общая тональность ответов", "Жауаптардың жалпы көңіл-күйі"],
+    "Text and 1–5 ratings are combined into positive, neutral and negative classifications.": ["Текст и оценки 1–5 вместе дают метку: позитивный, нейтральный или негативный.", "Мәтін мен 1–5 бағалар бірге оң, бейтарап немесе теріс белгі береді."],
+    "Topics": ["Темы", "Тақырыптар"],
+    "Most discussed topics": ["Самые обсуждаемые темы", "Ең көп талқыланатын тақырыптар"],
+    "Keyword matching supports English, Russian and Kazakh comments.": ["Работает с комментариями на английском, русском и казахском.", "Ағылшын, орыс және қазақ тілдеріндегі пікірлермен жұмыс істейді."],
+    "Aspects": ["Аспекты", "Аспектілер"],
+    "Sentiment by topic": ["Тональность по темам", "Тақырыптар бойынша көңіл-күй"],
+    "One comment can praise teaching while criticizing workload.": ["Один отзыв может хвалить преподавание и критиковать нагрузку.", "Бір пікір оқытуды мақтап, жүктемені сынауы мүмкін."],
+    "Problems": ["Проблемы", "Мәселелер"],
+    "Recurring negative themes": ["Повторяющиеся негативные темы", "Қайталанатын теріс тақырыптар"],
+    "A problem appears after at least three negative mentions in the selected scope.": ["Тема становится проблемой после трёх и более негативных упоминаний.", "Тақырып кемінде үш теріс пікірден кейін мәселе болып саналады."],
+    "No recurring problem has reached the three-mention threshold.": ["Пока ни одна тема не набрала трёх негативных упоминаний.", "Әзірге бірде-бір тақырып үш теріс пікірге жеткен жоқ."],
+    "No feedback has been submitted yet.": ["Отзывов пока нет.", "Әзірге пікір жоқ."],
+    "No topics were detected in these comments.": ["В этих комментариях темы не найдены.", "Бұл пікірлерде тақырып табылмады."],
+    "Aspect sentiment appears when comments mention a known topic.": ["Аспекты появятся, когда в отзывах упомянут известную тему.", "Пікірлерде белгілі тақырып аталғанда аспектілер шығады."],
+    "Analytics are temporarily unavailable.": ["Аналитика временно недоступна.", "Аналитика уақытша қолжетімсіз."],
+
+    // default topics
+    "Teaching Quality": ["Качество преподавания", "Оқыту сапасы"],
+    "Course Content": ["Содержание курса", "Курс мазмұны"],
+    "Workload": ["Нагрузка", "Жүктеме"],
+    "Assessment & Grading": ["Оценивание", "Бағалау"],
+    "Communication & Organization": ["Коммуникация и организация", "Байланыс және ұйымдастыру"],
+    "Facilities & Equipment": ["Аудитории и оборудование", "Аудиториялар мен жабдықтар"],
+    "Digital Resources": ["Цифровые ресурсы", "Цифрлық ресурстар"],
+    "Staff & Support": ["Сотрудники и поддержка", "Қызметкерлер мен қолдау"],
+    "Food & Cafeteria": ["Питание и столовая", "Тамақ және асхана"],
+    "Accommodation": ["Общежитие", "Жатақхана"],
+    "Library & Study Space": ["Библиотека и места для учёбы", "Кітапхана және оқу орны"],
+
+    // responses list
+    "All responses": ["Все ответы", "Барлық жауаптар"],
+    "Course evaluations": ["Оценки курсов", "Курстарды бағалау"],
+    "Service reviews": ["Отзывы о сервисах", "Қызметтерге пікірлер"],
+    "Personal data removed": ["Удалены личные данные", "Жеке деректер өшірілді"],
+    "All": ["Все", "Барлығы"],
+    "Courses": ["Курсы", "Курстар"],
+    "Services": ["Сервисы", "Қызметтер"],
+    "Every course & service": ["Все курсы и сервисы", "Барлық курстар мен қызметтер"],
+    "Every course": ["Все курсы", "Барлық курстар"],
+    "Course": ["Курс", "Курс"],
+    "Service": ["Сервис", "Қызмет"],
+    "Anonymous": ["Анонимно", "Анонимді"],
+    "positive": ["позитив", "оң"],
+    "neutral": ["нейтрально", "бейтарап"],
+    "negative": ["негатив", "теріс"],
+    "Average": ["Среднее", "Орташа"],
+    "Clarity": ["Понятность", "Түсініктілік"],
+    "Materials": ["Материалы", "Материалдар"],
+    "Assessment": ["Оценивание", "Бағалау"],
+    "Overall": ["В целом", "Жалпы"],
+    "No comment": ["Без комментария", "Пікірсіз"],
+    "Personal data removed before saving": ["Личные данные удалены до сохранения", "Жеке деректер сақтау алдында өшірілді"],
+    "No responses yet": ["Ответов пока нет", "Әзірге жауап жоқ"],
+    "Responses appear here as soon as students submit a form.": ["Ответы появятся здесь, как только студенты отправят форму.", "Студенттер форманы жібергенде жауаптар осында шығады."],
+    "No responses match these filters": ["По этим фильтрам ничего нет", "Бұл сүзгілер бойынша ештеңе жоқ"],
+    "Try a different search or clear the filters.": ["Измените поиск или сбросьте фильтры.", "Іздеуді өзгертіңіз немесе сүзгілерді тазалаңыз."],
+    "Loading responses…": ["Загружаем ответы…", "Жауаптар жүктелуде…"],
+    "Cannot reach the server.": ["Нет связи с сервером.", "Сервермен байланыс жоқ."],
+    "Could not load responses.": ["Не удалось загрузить ответы.", "Жауаптарды жүктеу мүмкін болмады."],
+
+    // admin panel
+    "Users": ["Пользователи", "Пайдаланушылар"],
+    "Create accounts, assign roles, ban or remove access.": ["Создавайте аккаунты, назначайте роли, блокируйте или удаляйте доступ.", "Аккаунт ашыңыз, рөл беріңіз, бұғаттаңыз немесе қолжетімділікті жойыңыз."],
+    "+ New user": ["+ Новый пользователь", "+ Жаңа пайдаланушы"],
+    "Total users": ["Всего", "Барлығы"],
+    "Active": ["Активные", "Белсенді"],
+    "Banned": ["Заблокированы", "Бұғатталған"],
+    "Staff": ["Сотрудники", "Қызметкерлер"],
+    "All roles": ["Все роли", "Барлық рөлдер"],
+    "Students": ["Студенты", "Студенттер"],
+    "Managers": ["Менеджеры", "Менеджерлер"],
+    "Admins": ["Админы", "Әкімшілер"],
+    "Any status": ["Любой статус", "Кез келген күй"],
+    "User": ["Пользователь", "Пайдаланушы"],
+    "Student ID": ["Студ. ID", "Студенттік ID"],
+    "Last sign-in": ["Последний вход", "Соңғы кіру"],
+    "ACTIVE": ["АКТИВЕН", "БЕЛСЕНДІ"],
+    "BANNED": ["ЗАБЛОКИРОВАН", "БҰҒАТТАЛҒАН"],
+    "STUDENT": ["СТУДЕНТ", "СТУДЕНТ"],
+    "FACULTY": ["ПРЕПОДАВАТЕЛЬ", "ОҚЫТУШЫ"],
+    "MANAGER": ["МЕНЕДЖЕР", "МЕНЕДЖЕР"],
+    "ADMINISTRATOR": ["АДМИНИСТРАТОР", "ӘКІМШІ"],
+    "YOU": ["ВЫ", "СІЗ"],
+    "Just now": ["Только что", "Жаңа ғана"],
+    "Never": ["Никогда", "Ешқашан"],
+    "No users match these filters": ["Пользователи не найдены", "Пайдаланушылар табылмады"],
+    "Could not load users.": ["Не удалось загрузить пользователей.", "Пайдаланушыларды жүктеу мүмкін болмады."],
+    "Loading users…": ["Загружаем пользователей…", "Пайдаланушылар жүктелуде…"],
+    "Edit user": ["Изменить", "Өзгерту"],
+    "Ban user": ["Заблокировать", "Бұғаттау"],
+    "Unban user": ["Разблокировать", "Бұғатты алу"],
+    "Delete user": ["Удалить", "Жою"],
+    "Actions": ["Действия", "Әрекеттер"],
+
+    // dialogs
+    "New user": ["Новый пользователь", "Жаңа пайдаланушы"],
+    "Create an account and choose its role.": ["Создайте аккаунт и выберите роль.", "Аккаунт ашып, рөлін таңдаңыз."],
+    "Full name": ["ФИО", "Аты-жөні"],
+    "Email": ["Email", "Email"],
+    "Password": ["Пароль", "Құпиясөз"],
+    "New password (optional)": ["Новый пароль (необязательно)", "Жаңа құпиясөз (міндетті емес)"],
+    "No department": ["Без факультета", "Факультетсіз"],
+    "students only": ["только для студентов", "тек студенттер үшін"],
+    "optional": ["необязательно", "міндетті емес"],
+    "optional, shown to the user": ["необязательно, увидит пользователь", "міндетті емес, пайдаланушы көреді"],
+    "Reason": ["Причина", "Себебі"],
+    "Cancel": ["Отмена", "Болдырмау"],
+    "Create user": ["Создать", "Құру"],
+    "Save changes": ["Сохранить", "Сақтау"],
+    "Confirm": ["Подтвердить", "Растау"],
+    "Delete permanently": ["Удалить навсегда", "Біржола жою"],
+    "Changes saved.": ["Изменения сохранены.", "Өзгерістер сақталды."],
+    "Saved. The user was signed out on all devices.": ["Сохранено. Пользователь вышел на всех устройствах.", "Сақталды. Пайдаланушы барлық құрылғыдан шықты."],
+    "Something went wrong.": ["Что-то пошло не так.", "Бірдеңе дұрыс болмады."],
+    "Something went wrong. Please try again.": ["Что-то пошло не так. Попробуйте ещё раз.", "Бірдеңе дұрыс болмады. Қайталап көріңіз."],
+    "Enter a full name.": ["Введите ФИО.", "Аты-жөнін енгізіңіз."],
+    "Enter a valid email.": ["Введите корректный email.", "Дұрыс email енгізіңіз."],
+    "Exactly 9 digits.": ["Ровно 9 цифр.", "Дәл 9 сан."],
+    "This is your own account — its admin role can't be removed here.": ["Это ваш аккаунт — роль администратора здесь снять нельзя.", "Бұл сіздің аккаунтыңыз — әкімші рөлін мұнда алу мүмкін емес."],
+    "Close": ["Закрыть", "Жабу"],
+
+    // attributes (placeholders, aria-labels, titles)
+    "Search comments": ["Поиск по комментариям", "Пікірлерден іздеу"],
+    "Search by name, email, ID or department": ["Поиск по имени, email, ID или факультету", "Аты, email, ID немесе факультет бойынша іздеу"],
+    "Filter by role": ["Фильтр по роли", "Рөл бойынша сүзу"],
+    "Filter by status": ["Фильтр по статусу", "Күй бойынша сүзу"],
+    "Filter by type": ["Фильтр по типу", "Түрі бойынша сүзу"],
+    "Filter by course or service": ["Фильтр по курсу или сервису", "Курс немесе қызмет бойынша сүзу"],
+    "Back to profile": ["Назад в профиль", "Профильге оралу"],
+    "Feedback analysis": ["Анализ отзывов", "Пікірлер талдауы"],
+    "Sentiment distribution": ["Распределение тональности", "Көңіл-күй үлесі"],
+    "Response statistics — click to filter": ["Статистика ответов — нажмите для фильтра", "Жауаптар статистикасы — сүзу үшін басыңыз"],
+    "User statistics — click to filter": ["Статистика пользователей — нажмите для фильтра", "Пайдаланушылар статистикасы — сүзу үшін басыңыз"],
+    "e.g. Repeated abusive comments in course reviews": ["например, оскорбительные комментарии в отзывах", "мысалы, пікірлердегі қорлайтын сөздер"],
+  };
+
+  const ROLE = { Administrator: 0, Manager: 1, Faculty: 2, Student: 3 };
+  const SENT = { positive: 0, neutral: 1, negative: 2 };
+  const pick = (en, idx) => (PHRASES[en] ? PHRASES[en][idx] : en);
+
+  // Phrases with numbers or names: [pattern, (match, idx) => text]
+  // Russian plural: 1 упоминание, 2–4 упоминания, 5+ упоминаний
+  const ru = (n, one, few, many) => {
+    const k = n % 100, d = n % 10;
+    return k > 10 && k < 20 ? many : d === 1 ? one : d >= 2 && d <= 4 ? few : many;
+  };
+  const PATTERNS = [
+    [/^(\d+)% of responses$/, (m, i) => (i ? `жауаптың ${m[1]}%` : `${m[1]}% ответов`)],
+    [/^(\d+)% (positive|neutral|negative)$/, (m, i) => `${m[1]}% ${pick(m[2], i)}`],
+    [/^(\d+) mentions?$/, (m, i) => (i ? `${m[1]} аталым` : `${m[1]} ${ru(+m[1], "упоминание", "упоминания", "упоминаний")}`)],
+    [/^(\d+) issues?$/, (m, i) => (i ? `${m[1]} мәселе` : `${m[1]} ${ru(+m[1], "проблема", "проблемы", "проблем")}`)],
+    [/^(\d+) negative mentions? \/ (\d+) total$/, (m, i) => (i ? `${m[2]} аталымның ${m[1]}-і теріс` : `${m[1]} негативных из ${m[2]}`)],
+    [/^(\d+)% of (\d+) mentions are (positive|negative)\.$/, (m, i) => (i ? `${m[2]} аталымның ${m[1]}%-ы ${pick(m[3], i)}.` : `${m[1]}% из ${m[2]} упоминаний ${m[3] === "positive" ? "позитивные" : "негативные"}.`)],
+    [/^(\d+) responses?, average rating ([\d.]+) out of 5$/, (m, i) => (i ? `${m[1]} жауап, орташа баға 5-тен ${m[2]}` : `${m[1]} ответов, средняя оценка ${m[2]} из 5`)],
+    [/^(\d+) responses?$/, (m, i) => (i ? `${m[1]} жауап` : `${m[1]} ответов`)],
+    [/^Average rating ([\d.]+) \/ 5$/, (m, i) => (i ? `Орташа баға ${m[1]} / 5` : `Средняя оценка ${m[1]} / 5`)],
+    [/^Show all (\d+) topics$/, (m, i) => (i ? `Барлық ${m[1]} тақырыпты көрсету` : `Показать все темы (${m[1]})`)],
+    [/^(.+), updated at (\d\d:\d\d)$/, (m, i) => (i ? `${m[1]}, ${m[2]} жаңартылды` : `${m[1]}, обновлено в ${m[2]}`)],
+    [/^Built from (\d+) responses? by the analysis engine\. It counts topic mentions and picks the most typical comments\.$/, (m, i) => (i ? `Талдау жүйесі ${m[1]} жауаптан құрастырды: тақырып аталымдарын санап, ең тән пікірлерді таңдайды.` : `Собрано системой анализа из ${m[1]} ответов: она считает упоминания тем и выбирает самые типичные отзывы.`)],
+    [/^Written by Claude from (\d+) responses?\. Personal data was removed before the comments were sent\.$/, (m, i) => (i ? `Claude ${m[1]} жауаптан жазды. Пікірлер жіберілмес бұрын жеке деректер өшірілді.` : `Написано Claude по ${m[1]} ответам. Личные данные удалены до отправки отзывов.`)],
+    [/^(\d+) students? asked for this$/, (m, i) => (i ? `Мұны ${m[1]} студент сұрады` : `Об этом просили студентов: ${m[1]}`)],
+    [/^(Positive|Neutral|Negative) about (.+)$/, (m, i) => {
+      const tone = { Positive: ["Позитивно", "Оң"], Neutral: ["Нейтрально", "Бейтарап"], Negative: ["Негативно", "Теріс"] }[m[1]][i];
+      return i ? `${pick(m[2], i)}: ${tone.toLowerCase()}` : `${tone} о теме «${pick(m[2], i)}»`;
+    }],
+    [/^Removed before saving: (.+)$/, (m, i) => (i ? `Сақтау алдында өшірілді: ${m[1]}` : `Удалено до сохранения: ${m[1]}`)],
+    [/^(Positive|Neutral|Negative) (\d+) \((\d+)%\)$/, (m, i) => `${pick(m[1].toLowerCase(), i).replace(/^./, c => c.toUpperCase())} ${m[2]} (${m[3]}%)`],
+    [/^(\d+)% negative$/, (m, i) => (i ? `${m[1]}% теріс` : `${m[1]}% негатива`)],
+    [/^(\d+) negative mentions out of (\d+)$/, (m, i) => (i ? `${m[2]} пікірдің ${m[1]}-і теріс` : `${m[1]} негативных из ${m[2]} упоминаний`)],
+    [/^(\d+)% positive, (\d+)% negative$/, (m, i) => (i ? `${m[1]}% оң, ${m[2]}% теріс` : `${m[1]}% позитива, ${m[2]}% негатива`)],
+    [/^(positive|neutral|negative): (\d+)$/, (m, i) => `${pick(m[1], i)}: ${m[2]}`],
+    [/^Aspect sentiment: (positive|neutral|negative)$/, (m, i) => `${i ? "Аспект" : "Аспект"}: ${pick(m[1], i)}`],
+    [/^(.+) · (positive|neutral|negative)$/, (m, i) => `${pick(m[1], i)} · ${pick(m[2], i)}`],
+    [/^Showing (\d+) of (\d+) responses?$/, (m, i) => (i ? `${m[2]} жауаптың ${m[1]}-і көрсетілді` : `Показано ${m[1]} из ${m[2]}`)],
+    [/^Showing (\d+) of (\d+) users?$/, (m, i) => (i ? `${m[2]} пайдаланушының ${m[1]}-і көрсетілді` : `Показано ${m[1]} из ${m[2]}`)],
+    [/^Show more \((\d+)\)$/, (m, i) => (i ? `Тағы көрсету (${m[1]})` : `Показать ещё (${m[1]})`)],
+    [/^Welcome, (.+)$/, (m, i) => (i ? `Қош келдіңіз, ${m[1]}` : `Добро пожаловать, ${m[1]}`)],
+    [/^Signed in as (Administrator|Manager|Faculty|Student)\.$/, (m, i) => (i ? `Рөл: ${pick(m[1], i)}.` : `Вы вошли как: ${pick(m[1], i).toLowerCase()}.`)],
+    [/^Responses for (.+) and university services$/, (m, i) => (i ? `${m[1]} және университет қызметтері бойынша жауаптар` : `Ответы: ${m[1]} и сервисы университета`)],
+    [/^(\d+) min ago$/, (m, i) => (i ? `${m[1]} мин бұрын` : `${m[1]} мин назад`)],
+    [/^(\d+) h ago$/, (m, i) => (i ? `${m[1]} сағ бұрын` : `${m[1]} ч назад`)],
+    [/^(\d+) d ago$/, (m, i) => (i ? `${m[1]} күн бұрын` : `${m[1]} дн. назад`)],
+    [/^(Edit|Ban|Unban|Delete) (.+?)(\?)?$/, (m, i) => {
+      const verb = { Edit: ["Изменить", "Өзгерту"], Ban: ["Заблокировать", "Бұғаттау"], Unban: ["Разблокировать", "Бұғатты алу"], Delete: ["Удалить", "Жою"] }[m[1]][i];
+      return i ? `${m[2]}: ${verb.toLowerCase()}${m[3] || ""}` : `${verb} ${m[2]}${m[3] || ""}`;
+    }],
+    [/^Editing (.+)$/, (m, i) => (i ? `Өзгерту: ${m[1]}` : `Редактирование: ${m[1]}`)],
+    [/^Too many failed attempts\. Try again in (\d+) seconds\.$/, (m, i) => (i ? `Тым көп сәтсіз әрекет. ${m[1]} секундтан кейін қайталаңыз.` : `Слишком много попыток. Повторите через ${m[1]} сек.`)],
+    [/^This account has been banned\. Reason: (.+)$/, (m, i) => (i ? `Бұл аккаунт бұғатталған. Себебі: ${m[1]}` : `Этот аккаунт заблокирован. Причина: ${m[1]}`)],
+    [/^Language: (.+)$/, (m, i) => (i ? `Тіл: ${m[1]}` : `Язык: ${m[1]}`)],
+  ];
+
+  const lang = () => (typeof window.getUiLanguage === "function" ? window.getUiLanguage() : "en");
+
+  function translate(src) {
+    const idx = { ru: 0, kk: 1 }[lang()];
+    if (idx === undefined) return src;
+    const lead = src.match(/^\s*/)[0], tail = src.match(/\s*$/)[0];
+    const core = src.trim();
+    if (!core) return src;
+    if (PHRASES[core]) return lead + PHRASES[core][idx] + tail;
+    for (const [rx, fn] of PATTERNS) {
+      const m = core.match(rx);
+      if (m) return lead + fn(m, idx) + tail;
+    }
+    return src;
+  }
+
+  // Remember each node's English source so switching back to English works.
+  const textSource = new WeakMap();
+  const attrSource = new WeakMap();
+  const ATTRS = ["placeholder", "aria-label", "title"];
+  const SKIP = "script, style, textarea, .rsp-text, [data-no-i18n]";
+
+  function translateText(node) {
+    const parent = node.parentElement;
+    if (!parent || parent.closest(SKIP)) return;
+    const rec = textSource.get(node);
+    const src = rec && node.data === rec.out ? rec.src : node.data;
+    const out = translate(src);
+    if (out !== node.data) node.data = out;
+    textSource.set(node, { src, out });
+  }
+
+  function translateAttrs(el) {
+    if (el.closest(SKIP)) return;
+    let rec = attrSource.get(el);
+    if (!rec) attrSource.set(el, (rec = {}));
+    for (const name of ATTRS) {
+      if (!el.hasAttribute(name)) continue;
+      const value = el.getAttribute(name);
+      const src = rec[name] && value === rec[name].out ? rec[name].src : value;
+      const out = translate(src);
+      if (out !== value) el.setAttribute(name, out);
+      rec[name] = { src, out };
+    }
+  }
+
+  function translateTree(root) {
+    if (root.nodeType === Node.TEXT_NODE) return translateText(root);
+    if (root.nodeType !== Node.ELEMENT_NODE) return;
+    translateAttrs(root);
+    root.querySelectorAll("[placeholder], [aria-label], [title]").forEach(translateAttrs);
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) translateText(walker.currentNode);
+  }
+
+  const observer = new MutationObserver(mutations => {
+    for (const m of mutations) {
+      if (m.type === "characterData") translateText(m.target);
+      else if (m.type === "attributes") translateAttrs(m.target);
+      else m.addedNodes.forEach(translateTree);
+    }
+  });
+
+  function start() {
+    translateTree(document.body);
+    observer.observe(document.body, {
+      subtree: true, childList: true, characterData: true,
+      attributes: true, attributeFilter: ATTRS,
+    });
+  }
+
+  window.addEventListener("ui-language-change", () => translateTree(document.body));
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
+})();

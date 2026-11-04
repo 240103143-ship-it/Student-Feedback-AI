@@ -114,6 +114,7 @@ will shall may might must am is it's i'm we're they're don't didn't doesn't cour
 очень это курс курса предмет предмета
 және мен бен пен да де та те бұл осы сол ол олар біз сіз сен мен бір екі үшін туралы бойынша немесе ма ме ба бе па пе
 ғой қой еді болды болып бар жоқ емес өте тым пәні пән курс
+please every week time also well get got make made lot lots thing things бірақ алайда да әр деп керек пожалуйста
 """.split())
 
 # Default topic taxonomy (editable by administrators in the UI)

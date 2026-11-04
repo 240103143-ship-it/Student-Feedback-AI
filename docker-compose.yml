@@ -34,6 +34,9 @@ services:
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
       DEMO_PASSWORD: ${DEMO_PASSWORD:-Pulse#2026}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      # Optional: lets the analytics page rewrite the summary with Claude (story 4.1).
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-claude-opus-5-5}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
 

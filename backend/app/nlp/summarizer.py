@@ -127,9 +127,12 @@ def local_summary(rows: list[dict], scope_label: str = "the selected scope") -> 
     aspects = aspect_stats(rows)
 
     min_n = max(3, round(n * 0.03))
-    strong = sorted([a for a in aspects if a["total"] >= min_n and a["positive_share"] >= 0.5],
+    # A topic is a strength or a problem, never both: a 50/50 split is reported as a problem only.
+    strong = sorted([a for a in aspects if a["total"] >= min_n and a["positive_share"] >= 0.5
+                     and a["positive"] > a["negative"]],
                     key=lambda a: (a["positive_share"], a["total"]), reverse=True)[:3]
-    weak = sorted([a for a in aspects if a["total"] >= min_n and a["negative_share"] >= 0.3],
+    weak = sorted([a for a in aspects if a["total"] >= min_n and a["negative_share"] >= 0.3
+                   and a["negative"] >= a["positive"]],
                   key=lambda a: a["negative"] * a["negative_share"], reverse=True)[:3]
 
     def examples(topic: str, label: str, k: int = 3) -> list[str]:

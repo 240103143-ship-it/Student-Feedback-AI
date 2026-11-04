@@ -101,6 +101,19 @@ DEMO_FEEDBACK = [
     ("service", "IT Help Desk", [4, 2, 2, 2], "The Wi-Fi is very slow and the online portal keeps disconnecting."),
     ("service", "Registrar's Office", [2, 2, 2, 2], "The staff are rude and the waiting time is too long. There are long queues."),
     ("service", "Career Center", [4, 4, 4, 4], "Support staff solved my problem quickly and were very professional."),
+    # Sprint 4 demo: repeated themes, suggestions and comments in all three languages
+    ("course", "CSS 101", [5, 5, 3, 4, 5], "Great lectures, but please add more practice tasks before the midterm."),
+    ("course", "CSS 101", [4, 4, 2, 3, 3], "Хотелось бы больше практических заданий, дедлайны слишком близко друг к другу."),
+    ("course", "CSS 215", [4, 5, 2, 3, 4], "Мұғалім материалды түсінікті түсіндіреді, бірақ үй тапсырмасы тым көп."),
+    ("course", "CSS 215", [3, 3, 2, 2, 2], "The exam questions did not match the lectures. It would be better to publish sample questions."),
+    ("course", "INF 318", [4, 4, 3, 4, 4], "The team project is useful and the instructor gives clear feedback on our code."),
+    ("course", "MAT 152", [2, 2, 1, 2, 2], "Lectures are too fast and the homework deadlines are stressful."),
+    ("service", "IT Help Desk", [3, 2, 2, 2], "Wi-Fi in the dormitory does not work in the evening, please fix the internet."),
+    ("service", "IT Help Desk", [3, 3, 2, 2], "Интернет в корпусе постоянно пропадает, портал не открывается."),
+    ("service", "Library", [4, 4, 4, 4], "Кітапхана тыныш және ыңғайлы, бірақ демалыс күндері де ашық болуы керек."),
+    ("service", "Library", [4, 3, 3, 3], "The library is quiet, but it would be nice to have more seats and longer opening hours."),
+    ("service", "Cafeteria", [3, 3, 2, 2], "Асханада кезек өте ұзақ, тамақ қымбат."),
+    ("service", "Cafeteria", [4, 4, 3, 4], "The food is tasty and fresh, but please add more vegetarian options."),
 ]
 
 
