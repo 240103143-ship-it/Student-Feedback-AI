@@ -522,11 +522,55 @@
           <span class="fx-sr">Search feedback</span>
           <input id="rspSearch" type="search" placeholder="Search comments, courses or topics" autocomplete="off">
         </label>
+        <div class="fx-select fx-sort">
+          <select id="rspSort" aria-label="Sort responses">
+            <option value="new">Newest first</option>
+            <option value="old">Oldest first</option>
+            <option value="low">Lowest rating first</option>
+            <option value="high">Highest rating first</option>
+            <option value="neg">Most negative first</option>
+          </select>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 7.5 5 5 5-5"/></svg>
+        </div>
+      </div>
+
+      <!-- Filters: every control mirrors rspState, so the charts above, the chips and these stay in step -->
+      <div class="fx-filterbar" role="group" aria-label="Filter responses">
         <div class="fx-seg" id="rspKindSeg" role="group" aria-label="Filter by type">
           <button type="button" data-kind="" class="on" aria-pressed="true">All</button>
           <button type="button" data-kind="course" aria-pressed="false">Courses</button>
           <button type="button" data-kind="service" aria-pressed="false">Services</button>
         </div>
+        <div class="fx-seg fx-tone-seg" id="rspSentimentSeg" role="group" aria-label="Filter by sentiment">
+          <button type="button" data-filter-sentiment="" class="on" aria-pressed="true">Any tone</button>
+          <button type="button" data-filter-sentiment="positive" class="is-positive" aria-pressed="false"><i class="fa-dot" aria-hidden="true"></i>Positive</button>
+          <button type="button" data-filter-sentiment="neutral" class="is-neutral" aria-pressed="false"><i class="fa-dot" aria-hidden="true"></i>Neutral</button>
+          <button type="button" data-filter-sentiment="negative" class="is-negative" aria-pressed="false"><i class="fa-dot" aria-hidden="true"></i>Negative</button>
+        </div>
+        <div class="fx-select">
+          <select id="rspTopic" aria-label="Filter by topic"><option value="">Every topic</option></select>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 7.5 5 5 5-5"/></svg>
+        </div>
+        <div class="fx-select">
+          <select id="rspRating" aria-label="Filter by average rating">
+            <option value="">Any rating</option>
+            <option value="high">Rating 4–5</option>
+            <option value="mid">Rating 3–3.9</option>
+            <option value="low">Rating below 3</option>
+          </select>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 7.5 5 5 5-5"/></svg>
+        </div>
+        <div class="fx-select">
+          <select id="rspLanguage" aria-label="Filter by language">
+            <option value="">Any language</option>
+            <option value="en">English</option>
+            <option value="ru">Russian</option>
+            <option value="kk">Kazakh</option>
+          </select>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 7.5 5 5 5-5"/></svg>
+        </div>
+        <button type="button" class="fx-toggle" id="rspCommented" aria-pressed="false">With a comment</button>
+        <button type="button" class="fx-toggle" id="rspPiiToggle" aria-pressed="false">Personal data removed</button>
       </div>
 
       <div class="fx-filters" id="rspFilters" hidden>
@@ -1937,6 +1981,16 @@ const responsesApp = $("responsesApp"), rspCount = $("rspCount"), rspKpis = $("r
 const rspState = {
   data: null, analytics: null, summary: null, keywords: null, quoteTopic: "", kind: "", pii: false, target: "", q: "",
   sentiment: "", topic: "", tone: "", expanded: { topics: false, aspects: false },
+  // explorer-only filters and order
+  language: "", rating: "", commented: false, sort: "new",
+};
+const EXPLORER_RESET = { kind: "", pii: false, target: "", q: "", sentiment: "", topic: "", tone: "", language: "", rating: "", commented: false };
+const RATING_FILTER = { high: "pos", mid: "mid", low: "neg" };
+const RATING_LABEL = { high: "Rating 4–5", mid: "Rating 3–3.9", low: "Rating below 3" };
+// Mean of the response's 1–5 answers, the number its card shows.
+const avgRating = r => {
+  const v = Object.values(r.ratings || {});
+  return v.length ? v.reduce((a, b) => a + b, 0) / v.length : (r.rating ?? null);
 };
 const SENTIMENTS = ["positive", "neutral", "negative"];
 const SENTIMENT_LABEL = { positive: "Positive", neutral: "Neutral", negative: "Negative" };
@@ -2021,8 +2075,19 @@ async function loadResponses() {
     + sorted.map(([k, label]) => `<option value="${k}">${escapeHtml(label)}</option>`).join("");
   if (!targets.has(rspState.target)) rspState.target = "";
   rspTarget.value = rspState.target;
+  fillTopicFilter();
   renderAnalytics();
   renderResponses();
+}
+
+// Topics that actually occur in the loaded responses, most mentioned first.
+function fillTopicFilter() {
+  const counts = new Map();
+  rspState.data.items.forEach(r => (r.topics || []).forEach(t => counts.set(t, (counts.get(t) || 0) + 1)));
+  const topics = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  $("rspTopic").innerHTML = '<option value="">Every topic</option>'
+    + topics.map(([t, n]) => `<option value="${escapeHtml(t)}">${escapeHtml(t)} (${n})</option>`).join("");
+  if (rspState.topic && !counts.has(rspState.topic)) rspState.topic = rspState.tone = "";
 }
 
 // Story 3.3: the whole page follows the chosen course or service, not only the list.
@@ -2285,6 +2350,19 @@ function syncSelection() {
     b.classList.toggle("on", on);
     press(b, on);
   });
+  // Type is fixed once one course or service is chosen, and faculty only have courses.
+  $("rspKindSeg").hidden = currentSession?.user.role === "faculty" || !!rspState.target;
+  $("rspSentimentSeg").querySelectorAll("button").forEach(b => {
+    const on = b.dataset.filterSentiment === rspState.sentiment;
+    b.classList.toggle("on", on);
+    press(b, on);
+  });
+  $("rspTopic").value = rspState.topic;
+  $("rspRating").value = rspState.rating;
+  $("rspLanguage").value = rspState.language;
+  $("rspSort").value = rspState.sort;
+  press($("rspCommented"), rspState.commented);
+  press($("rspPiiToggle"), rspState.pii);
 }
 
 /* ---------- feedback explorer ---------- */
@@ -2362,6 +2440,9 @@ function activeFilters() {
   if (rspState.target) filters.push(["target", rspTarget.selectedOptions[0]?.textContent || rspState.target]);
   if (rspState.sentiment) filters.push(["sentiment", `${SENTIMENT_LABEL[rspState.sentiment]} sentiment`]);
   if (rspState.topic) filters.push(["topic", rspState.tone ? `${rspState.topic}, ${rspState.tone} mentions` : `Topic: ${rspState.topic}`]);
+  if (rspState.rating) filters.push(["rating", RATING_LABEL[rspState.rating]]);
+  if (rspState.language) filters.push(["language", LANGUAGE_LABEL[rspState.language]]);
+  if (rspState.commented) filters.push(["commented", "With a comment"]);
   if (rspState.pii) filters.push(["pii", "Personal data removed"]);
   if (q) filters.push(["q", `“${q}”`]);
   return filters;
@@ -2392,9 +2473,25 @@ function renderResponses() {
       if (!tone && !(r.topics || []).includes(rspState.topic)) return false;
       if (rspState.tone && tone !== rspState.tone) return false;
     }
+    if (rspState.commented && !(r.comment || "").trim()) return false;
+    // A ratings-only response has no language of its own.
+    if (rspState.language && (!(r.comment || "").trim() || r.language !== rspState.language)) return false;
+    if (rspState.rating) {
+      const avg = avgRating(r);
+      if (avg == null || ratingBand(avg) !== RATING_FILTER[rspState.rating]) return false;
+    }
     if (q && !`${r.comment} ${r.target} ${(r.topics || []).join(" ")}`.toLowerCase().includes(q)) return false;
     return true;
   });
+  const byRating = dir => (a, b) => ((avgRating(a) ?? 3) - (avgRating(b) ?? 3)) * dir || b.id - a.id;
+  const order = {
+    new: null,  // the server already sends newest first
+    old: (a, b) => (a.date || "").localeCompare(b.date || "") || a.id - b.id,
+    low: byRating(1),
+    high: byRating(-1),
+    neg: (a, b) => (a.sentiment_score ?? 0) - (b.sentiment_score ?? 0) || b.id - a.id,
+  }[rspState.sort];
+  if (order) list.sort(order);
   rspList.innerHTML = list.map(r => rspHtml(r, qLabel)).join("");
   markLongComments();
   renderChips();
@@ -2417,12 +2514,15 @@ function removeFilter(key) {
   if (key === "sentiment") rspState.sentiment = "";
   if (key === "topic") rspState.topic = rspState.tone = "";
   if (key === "pii") rspState.pii = false;
+  if (key === "rating") rspState.rating = "";
+  if (key === "language") rspState.language = "";
+  if (key === "commented") rspState.commented = false;
   if (key === "q") { rspState.q = ""; rspSearch.value = ""; }
   renderResponses();
 }
 function clearResponseFilters() {
   const hadTarget = !!rspState.target;
-  Object.assign(rspState, { kind: "", pii: false, target: "", q: "", sentiment: "", topic: "", tone: "" });
+  Object.assign(rspState, EXPLORER_RESET);
   rspSearch.value = "";
   rspTarget.value = "";
   renderResponses();
@@ -2512,6 +2612,17 @@ rspTarget.addEventListener("change", () => {
   reloadAnalytics();
 });
 rspSearch.addEventListener("input", () => { rspState.q = rspSearch.value; renderResponses(); });
+$("rspSentimentSeg").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  rspState.sentiment = b.dataset.filterSentiment;
+  renderResponses();
+});
+$("rspTopic").addEventListener("change", e => { rspState.topic = e.target.value; rspState.tone = ""; renderResponses(); });
+$("rspRating").addEventListener("change", e => { rspState.rating = e.target.value; renderResponses(); });
+$("rspLanguage").addEventListener("change", e => { rspState.language = e.target.value; renderResponses(); });
+$("rspSort").addEventListener("change", e => { rspState.sort = e.target.value; renderResponses(); });
+$("rspCommented").addEventListener("click", () => { rspState.commented = !rspState.commented; renderResponses(); });
+$("rspPiiToggle").addEventListener("click", () => { rspState.pii = !rspState.pii; renderResponses(); });
 $("rspRefresh").addEventListener("click", loadResponses);
 
 $("openFeedback").addEventListener("click", openFeedback);

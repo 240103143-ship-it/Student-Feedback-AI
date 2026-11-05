@@ -184,6 +184,32 @@
     "Services": ["Сервисы", "Қызметтер"],
     "Every course & service": ["Все курсы и сервисы", "Барлық курстар мен қызметтер"],
     "Every course": ["Все курсы", "Барлық курстар"],
+
+    // explorer filters and order
+    "Sort responses": ["Порядок отзывов", "Пікірлер реті"],
+    "Newest first": ["Сначала новые", "Алдымен жаңалары"],
+    "Oldest first": ["Сначала старые", "Алдымен ескілері"],
+    "Lowest rating first": ["Сначала низкая оценка", "Алдымен төмен баға"],
+    "Highest rating first": ["Сначала высокая оценка", "Алдымен жоғары баға"],
+    "Most negative first": ["Сначала самые негативные", "Алдымен ең теріс"],
+    "Filter responses": ["Фильтры отзывов", "Пікір сүзгілері"],
+    "Filter by type": ["Фильтр по типу", "Түрі бойынша сүзу"],
+    "Filter by sentiment": ["Фильтр по тональности", "Көңіл-күй бойынша сүзу"],
+    "Any tone": ["Любой тон", "Кез келген"],
+    "Filter by topic": ["Фильтр по теме", "Тақырып бойынша сүзу"],
+    "Every topic": ["Все темы", "Барлық тақырыптар"],
+    "Filter by average rating": ["Фильтр по средней оценке", "Орташа баға бойынша сүзу"],
+    "Any rating": ["Любая оценка", "Кез келген баға"],
+    "Rating 4–5": ["Оценка 4–5", "Баға 4–5"],
+    "Rating 3–3.9": ["Оценка 3–3,9", "Баға 3–3,9"],
+    "Rating below 3": ["Оценка ниже 3", "Баға 3-тен төмен"],
+    "Filter by language": ["Фильтр по языку", "Тіл бойынша сүзу"],
+    "Any language": ["Любой язык", "Кез келген тіл"],
+    "With a comment": ["С комментарием", "Пікірі бар"],
+    // filter chips
+    "Positive sentiment": ["Позитивный тон", "Оң көңіл-күй"],
+    "Neutral sentiment": ["Нейтральный тон", "Бейтарап көңіл-күй"],
+    "Negative sentiment": ["Негативный тон", "Теріс көңіл-күй"],
     "Course": ["Курс", "Курс"],
     "Service": ["Сервис", "Қызмет"],
     "Anonymous": ["Анонимно", "Анонимді"],
@@ -335,6 +361,11 @@
     [/^Too many failed attempts\. Try again in (\d+) seconds\.$/, (m, i) => (i ? `Тым көп сәтсіз әрекет. ${m[1]} секундтан кейін қайталаңыз.` : `Слишком много попыток. Повторите через ${m[1]} сек.`)],
     [/^This account has been banned\. Reason: (.+)$/, (m, i) => (i ? `Бұл аккаунт бұғатталған. Себебі: ${m[1]}` : `Этот аккаунт заблокирован. Причина: ${m[1]}`)],
     [/^Language: (.+)$/, (m, i) => (i ? `Тіл: ${m[1]}` : `Язык: ${m[1]}`)],
+    // filter chips: "Topic: Workload", "Workload, negative mentions"
+    [/^Topic: (.+)$/, (m, i) => (i ? `Тақырып: ${pick(m[1], i)}` : `Тема: ${pick(m[1], i)}`)],
+    [/^(.+), (positive|neutral|negative) mentions$/, (m, i) => `${pick(m[1], i)}, ${pick(m[2], i)}`],
+    // last, so the specific patterns above win: topic filter options, e.g. "Teaching Quality (3)"
+    [/^(.+) \((\d+)\)$/, (m, i) => (PHRASES[m[1]] ? `${pick(m[1], i)} (${m[2]})` : m[0])],
   ];
 
   const lang = () => (typeof window.getUiLanguage === "function" ? window.getUiLanguage() : "en");
