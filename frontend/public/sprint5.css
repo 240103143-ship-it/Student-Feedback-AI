@@ -81,8 +81,9 @@
 #responsesApp .mgr-department-item { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:11px 12px; border:1px solid var(--line); border-radius:9px; font-size:13px; }
 #responsesApp .mgr-department-item span { white-space:nowrap; color:var(--ink-3); }
 #responsesApp .mgr-data-source { margin-top:12px; font-size:12px; color:var(--ink-3); }
-#responsesApp .mgr-stack { display:grid; gap:15px; }
-#responsesApp .mgr-chart-wrap { width:100%; overflow-x:auto; }
+#responsesApp .mgr-stack { display:grid; grid-template-columns:minmax(0,1fr); gap:15px; }
+#responsesApp .mgr-chart-wrap { width:100%; }
+#responsesApp .mgr-trend-scroll { overflow-x:auto; }
 #responsesApp .mgr-chart { display:block; width:100%; height:auto; }
 #responsesApp .mgr-chart line { stroke: var(--line); }
 #responsesApp .mgr-chart text { fill:var(--ink-3); font-size:14px; }
@@ -100,10 +101,9 @@
 #responsesApp .mgr-topic-trends-title label { display:flex; align-items:center; gap:8px; font-size:13px; }
 #responsesApp .mgr-topic-trends-title select { border:1px solid var(--line); border-radius:8px; background:var(--surface); padding:9px; max-width:240px; }
 #responsesApp .mgr-topic-bars { display:grid; gap:13px; }
-#responsesApp .mgr-topic-bar-row { display:grid; grid-template-columns:100px 1fr 58px 76px; align-items:center; gap:10px; font-size:12px; }
+#responsesApp .mgr-topic-bar-row { display:grid; grid-template-columns:100px minmax(0,1fr) 88px; align-items:center; gap:10px; font-size:12px; }
 #responsesApp .mgr-topic-bar-track { height:13px; overflow:hidden; border-radius:99px; background:var(--surface-2); }
 #responsesApp .mgr-topic-bar-track i { display:block; height:100%; border-radius:99px; background:#7b98c6; }
-#responsesApp .mgr-topic-bar-row small { color:var(--ink-3); }
 #responsesApp .mgr-alert-list { display:grid; gap:12px; }
 #responsesApp .mgr-alert-card { padding:19px; border:1px solid #e4a8a8; border-radius:14px; background:#fff6f6; }
 #responsesApp .mgr-alert-title { color:#aa323a; font-size:16px; font-weight:650; }
@@ -160,6 +160,50 @@
   #responsesApp .mgr-overview-alert { grid-column:auto; }
   #responsesApp .rail-nav .mgr-submenu { display:flex; flex-wrap:wrap; border-left:0; margin:0; padding:4px 0; }
   #responsesApp .rail-nav .mgr-submenu button { width:auto; min-height:34px; }
-  #responsesApp .mgr-topic-bar-row { grid-template-columns:85px 1fr 35px; }
-  #responsesApp .mgr-topic-bar-row small { display:none; }
+  #responsesApp .mgr-topic-bar-row { grid-template-columns:78px minmax(0,1fr) 70px; }
+  #responsesApp .mgr-topic-trends-title { flex-wrap:wrap; }
+  #responsesApp .mgr-topic-trends-title select { max-width:170px; }
 }
+
+#responsesApp .mgr-submenu[hidden],
+#responsesApp .mgr-submenu button[hidden],
+#responsesApp .mgr-card[hidden] { display: none !important; }
+
+/* Sprint 5 polish: notifications, readable semester comparisons, report context. */
+#responsesApp .mgr-notification-count { margin-left:auto; min-width:20px; height:20px; display:inline-grid; place-items:center; padding:0 5px; border-radius:20px; background:#fbe4e6; color:#aa3038; font-size:11px; font-weight:700; }
+#responsesApp .mgr-notification-count[hidden] { display:none !important; }
+#responsesApp .mgr-period-controls { display:flex; gap:13px; flex-wrap:wrap; padding:13px 0 17px; border-top:1px solid var(--line); }
+#responsesApp .mgr-period-controls label { display:grid; gap:7px; flex:1 1 220px; max-width:350px; color:var(--ink-2); font-size:13px; font-weight:600; }
+#responsesApp .mgr-period-controls select { width:100%; min-height:43px; padding:7px 12px; border:1px solid var(--line-strong); border-radius:9px; color:var(--ink); background:var(--surface); font:500 14px var(--sans); }
+#responsesApp .mgr-compare-scope { color:var(--ink-3); font-size:13px; margin:0 0 15px; }
+#responsesApp .mgr-comparison-summary { display:flex; flex-wrap:wrap; gap:9px; margin:14px 0 17px; }
+#responsesApp .mgr-comparison-summary span { padding:9px 12px; border:1px solid var(--line); border-radius:9px; background:var(--surface-2); color:var(--ink-2); font-size:12px; }
+#responsesApp .mgr-comparison-summary b { color:var(--ink); font-size:15px; }
+#responsesApp .mgr-comparison-rows { display:grid; gap:13px; }
+#responsesApp .mgr-comparison-row { min-width:0; padding:16px 17px; border:1px solid var(--line); border-radius:13px; background:var(--surface); }
+#responsesApp .mgr-comparison-row-title { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; color:var(--ink); }
+#responsesApp .mgr-comparison-row-title > b { font-size:15px; overflow-wrap:anywhere; }
+#responsesApp .mgr-change { flex-shrink:0; padding:5px 9px; border-radius:20px; font-size:12px; font-weight:650; }
+#responsesApp .mgr-change.is-up { background:var(--pos-soft); color:var(--pos); }
+#responsesApp .mgr-change.is-down { background:var(--neg-soft); color:var(--neg); }
+#responsesApp .mgr-change.is-unknown { background:var(--surface-2); color:var(--ink-3); }
+#responsesApp .mgr-comparison-pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+#responsesApp .mgr-semester-rating { padding:13px; min-width:0; border-radius:11px; background:var(--surface-2); }
+#responsesApp .mgr-period-name { font-weight:650; font-size:13px; margin-bottom:9px; }
+#responsesApp .mgr-score-heading { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:6px; margin-bottom:10px; }
+#responsesApp .mgr-score-heading strong { font-size:25px; line-height:1.1; color:var(--ink); font-variant-numeric:tabular-nums; }
+#responsesApp .mgr-score-heading strong small { font-size:13px; font-weight:500; color:var(--ink-3); }
+#responsesApp .mgr-score-heading span, #responsesApp .mgr-score-detail { color:var(--ink-3); font-size:12px; }
+#responsesApp .mgr-rating-track { width:100%; height:11px; overflow:hidden; border-radius:20px; background:var(--line); margin-bottom:10px; }
+#responsesApp .mgr-rating-fill { height:100%; display:block; background:#72bc87; border-radius:20px; }
+#responsesApp .mgr-semester-rating.later .mgr-rating-fill { background:#269ad9; }
+#responsesApp .mgr-report-facts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; margin:14px 0; }
+#responsesApp .mgr-report-facts span { display:grid; gap:5px; min-width:0; padding:11px; border:1px solid var(--line); border-radius:8px; color:var(--ink-2); font-size:12px; overflow-wrap:anywhere; }
+#responsesApp .mgr-report-facts b { color:var(--ink); }
+@media(max-width:760px) { #responsesApp .mgr-comparison-pair, #responsesApp .mgr-report-facts { grid-template-columns:1fr; } }
+#responsesApp .mgr-comparison-details { margin-top:12px; padding-top:10px; border-top:1px solid var(--line); }
+#responsesApp .mgr-comparison-details summary { color:var(--brand); font-size:13px; font-weight:600; cursor:pointer; width:fit-content; }
+#responsesApp .mgr-comparison-details-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:12px 0; }
+#responsesApp .mgr-comparison-details-grid span { display:grid; gap:4px; min-width:0; font-size:12px; color:var(--ink-2); overflow-wrap:anywhere; }
+#responsesApp .mgr-comparison-details-grid b { color:var(--ink); }
+#responsesApp .mgr-comparison-details p { color:var(--ink-3); font-size:12px; }
